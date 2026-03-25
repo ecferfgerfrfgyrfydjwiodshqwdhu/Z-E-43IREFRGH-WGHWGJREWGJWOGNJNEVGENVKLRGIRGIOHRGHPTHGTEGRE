@@ -1,0 +1,568 @@
+import React, { useState, useEffect } from 'react';
+import { 
+  Globe, 
+  ShieldCheck, 
+  Cpu, 
+  Briefcase, 
+  PlaneTakeoff, 
+  ChevronRight, 
+  Search, 
+  Menu, 
+  X,
+  CreditCard,
+  FileText
+} from 'lucide-react';
+
+// Yahan hum advance 3D animations aur light glassmorphism ke liye custom styles inject kar rahe hain
+const customStyles = `
+  @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+  .font-inter {
+    font-family: 'Inter', sans-serif;
+  }
+
+  @keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-20px); }
+    100% { transform: translateY(0px); }
+  }
+  @keyframes glow {
+    0% { box-shadow: 0 0 20px rgba(236, 72, 153, 0.3); }
+    50% { box-shadow: 0 0 40px rgba(59, 130, 246, 0.6); }
+    100% { box-shadow: 0 0 20px rgba(236, 72, 153, 0.3); }
+  }
+  
+  /* Modern Tech Light Glassmorphism */
+  .glass-panel {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
+  }
+  
+  .card-hover {
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+  .card-hover:hover {
+    transform: translateY(-8px) scale(1.02);
+    border-color: rgba(236, 72, 153, 0.4); /* Pink hover border */
+    box-shadow: 0 20px 40px -10px rgba(59, 130, 246, 0.2); /* Blue shadow */
+  }
+  
+  /* Gradient text for headings */
+  .text-gradient {
+    background: linear-gradient(135deg, #ec4899 0%, #3b82f6 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  
+  html { scroll-behavior: smooth; }
+  body { background-color: #ffffff; color: #0f172a; font-family: 'Montserrat', sans-serif; overflow-x: hidden; }
+`;
+
+export default function App() {
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  
+  // Search state variables for AI integration
+  const [searchQuery, setSearchQuery] = useState('');
+  const [aiResponse, setAiResponse] = useState(null);
+  const [isAiLoading, setIsAiLoading] = useState(false);
+  const [hasSearched, setHasSearched] = useState(false);
+  
+  // Naye states typing effect ke liye
+  const [displayedResponse, setDisplayedResponse] = useState('');
+  const [isTyping, setIsTyping] = useState(false);
+
+  // Scroll effect for Navbar transparency
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 50);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Typing effect hook
+  useEffect(() => {
+    if (!aiResponse) {
+      setDisplayedResponse('');
+      setIsTyping(false);
+      return;
+    }
+
+    setIsTyping(true);
+    setDisplayedResponse('');
+    let i = 0;
+    
+    // Typing speed control (15ms per character)
+    const intervalId = setInterval(() => {
+      setDisplayedResponse(aiResponse.slice(0, i + 1));
+      i++;
+      if (i >= aiResponse.length) {
+        clearInterval(intervalId);
+        setIsTyping(false);
+      }
+    }, 15);
+
+    return () => clearInterval(intervalId);
+  }, [aiResponse]);
+
+  // Gemini AI Fetch Function (Background Process)
+  const fetchGeminiResponse = async (query) => {
+    const apiKey = ""; // API Key will be injected by the environment
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+    const delays = [1000, 2000, 4000, 8000, 16000];
+
+    const systemPrompt = `Aap 'Zero Enterprise' ke smart AI Assistant hain. Zero Enterprise 2018 se Rajasthan mein e-services de rahi hai.
+    Hamari main services:
+    1. Gov-Tech: Jan Aadhaar, Ration Card, Voter ID, PAN Card, Caste/Income Certificate, Scholarship, Driving License.
+    2. Fin-Suite: AEPS Withdrawals, Money Transfer, Utility/Insurance Bills, ITR Filing & Tax.
+    3. Corporate Legal: GST Registration, MSME/Udyam Setup, Legal Affidavits, Digital Signature (DSC).
+    4. Global Mobility: IRCTC Rail Tickets, Flight Tickets, Passport Processing.
+
+    User ke sawalo ka jawab professional, helpful aur clear tareeqe se dein. Agar user kisi service ke baare me pooche, toh process ya required documents ki brief jankari dein. Jawab Hinglish (Hindi in English script) mein hona chahiye taaki local logo ko samajh aaye. Jawab points mein de sakte hain lekin lamba nahi hona chahiye.`;
+
+    const payload = {
+      contents: [{ parts: [{ text: query }] }],
+      systemInstruction: { parts: [{ text: systemPrompt }] }
+    };
+
+    for (let i = 0; i < delays.length; i++) {
+      try {
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        if (!res.ok) throw new Error('API Error');
+        const data = await res.json();
+        return data.candidates?.[0]?.content?.parts?.[0]?.text || "Maaf kijiye, mujhe iska jawab nahi mil paaya.";
+      } catch (error) {
+        if (i === delays.length - 1) throw error;
+        await new Promise(r => setTimeout(r, delays[i]));
+      }
+    }
+  };
+
+  // Search handle function
+  const handleSearch = async (e) => {
+    if (e) e.preventDefault();
+    if (!searchQuery.trim()) return;
+
+    setHasSearched(true);
+    setIsAiLoading(true);
+    setAiResponse(null);
+
+    try {
+      const responseText = await fetchGeminiResponse(searchQuery);
+      setAiResponse(responseText);
+    } catch (error) {
+      setAiResponse("Network error! Kripya thodi der baad dobara koshish karein.");
+    } finally {
+      setIsAiLoading(false);
+    }
+  };
+
+  // Quick tag search function
+  const handleQuickSearch = (tag) => {
+    setSearchQuery(tag);
+    // Fake event pass for direct execution
+    handleSearch({ preventDefault: () => {} });
+  };
+
+  // Clear search
+  const clearSearch = () => {
+    setSearchQuery('');
+    setAiResponse(null);
+    setDisplayedResponse('');
+    setIsTyping(false);
+    setHasSearched(false);
+  };
+
+  return (
+    <div className="min-h-screen bg-white text-slate-900 selection:bg-indigo-500/30 relative">
+      <style>{customStyles}</style>
+
+      {/* --- GLOBAL BACKGROUND (LIKE HERO SECTION) --- */}
+      <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-pink-400/20 rounded-full blur-[100px]"></div>
+        <div className="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-blue-400/20 rounded-full blur-[100px]"></div>
+        <div className="absolute top-[40%] right-[-5%] w-72 h-72 bg-indigo-400/10 rounded-full blur-[100px]"></div>
+        <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'radial-gradient(#ec4899 1px, transparent 1px)', backgroundSize: '30px 30px' }}></div>
+      </div>
+
+      {/* --- NAVBAR SECTION --- */}
+      <nav className={`fixed w-full z-50 transition-all duration-300 ${isScrolled ? 'glass-panel py-3 shadow-md' : 'bg-transparent py-5'}`}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center">
+            {/* Logo */}
+            <div className="flex items-center gap-2 cursor-pointer group">
+              {/* Modern Tech Zero Logo */}
+              <div className="relative w-9 h-9 flex items-center justify-center bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl shadow-[0_4px_10px_rgba(79,70,229,0.3)] transition-transform duration-300 group-hover:scale-105">
+                <div className="absolute w-4 h-5 border-2 border-white rounded-[4px]"></div>
+                <div className="absolute w-6 h-[2px] bg-white transform -rotate-45 rounded-full"></div>
+              </div>
+              <span className="text-xl font-light tracking-wider text-indigo-600 ml-1 font-inter">
+                ZERO ENTERPRISE
+              </span>
+            </div>
+
+            {/* Desktop Menu */}
+            <div className="hidden md:flex space-x-8 items-center text-sm font-semibold text-slate-600">
+              <a href="#home" className="hover:text-indigo-600 transition-colors">Ecosystem</a>
+              <a href="#services" className="hover:text-indigo-600 transition-colors">Services</a>
+              <a href="#about" className="hover:text-indigo-600 transition-colors">Our Legacy</a>
+              <button className="px-5 py-2 rounded-full bg-indigo-50 border border-indigo-200 text-indigo-700 hover:bg-indigo-600 hover:text-white transition-all duration-300 shadow-sm">
+                Track Application
+              </button>
+            </div>
+
+            {/* Mobile Menu Button */}
+            <div className="md:hidden">
+              <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="text-slate-600 hover:text-indigo-600">
+                {mobileMenuOpen ? <X size={28} /> : <Menu size={28} />}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile Dropdown */}
+        {mobileMenuOpen && (
+          <div className="md:hidden glass-panel absolute top-full left-0 w-full py-4 px-4 flex flex-col gap-4 border-t border-slate-200 shadow-lg">
+            <a href="#home" className="text-slate-700 hover:text-indigo-600 font-medium">Ecosystem</a>
+            <a href="#services" className="text-slate-700 hover:text-indigo-600 font-medium">Services</a>
+            <a href="#about" className="text-slate-700 hover:text-indigo-600 font-medium">Our Legacy</a>
+            <button className="w-full px-5 py-2 rounded-md bg-indigo-50 border border-indigo-200 text-indigo-700 font-medium hover:bg-indigo-600 hover:text-white">
+              Track Application
+            </button>
+          </div>
+        )}
+      </nav>
+
+      {/* --- HERO SECTION --- */}
+      {/* Niche ka padding (pb) kam kiya gaya hai taaki gap kam ho */}
+      <section id="home" className="relative z-10 pt-32 pb-8 lg:pt-48 lg:pb-10 overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative flex flex-col lg:flex-row items-center gap-16">
+          
+          {/* Hero Content */}
+          <div className="flex-1 text-center lg:text-left">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full glass-panel border-indigo-200 text-indigo-700 text-xs font-bold tracking-wider mb-6 shadow-sm">
+              <span className="w-2 h-2 rounded-full bg-indigo-600 animate-pulse"></span>
+              EST. 2018 | RAJASTHAN
+            </div>
+            <h1 className="text-5xl lg:text-7xl font-extrabold tracking-tight mb-6 leading-tight text-slate-900">
+              REDEFINING <br />
+              <span className="text-gradient">DIGITAL</span> ACCESSIBILITY.
+            </h1>
+            <p className="text-lg text-slate-600 mb-8 max-w-2xl mx-auto lg:mx-0 leading-relaxed font-medium">
+              From complex bureaucracy to seamless digital solutions. We handle Government-to-Citizen services, corporate compliance, and fintech solutions. Everything starts from <span className="text-indigo-600 font-bold">Zero</span>, so you can scale to infinity.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+              <button className="px-8 py-3 rounded-xl bg-indigo-600 text-white font-bold hover:bg-indigo-700 hover:shadow-[0_10px_25px_rgba(79,70,229,0.3)] transition-all duration-300 flex items-center justify-center gap-2 transform hover:-translate-y-1">
+                Explore Ecosystem <ChevronRight size={18} />
+              </button>
+              <button className="px-8 py-3 rounded-xl glass-panel text-slate-800 font-semibold hover:bg-slate-100 transition-all duration-300 flex items-center justify-center gap-2 shadow-sm border border-slate-200">
+                Consult an Expert
+              </button>
+            </div>
+
+            {/* --- AI SEARCH BAR (MOVED TO HERO SECTION) --- */}
+            <div className="mt-12 w-full max-w-2xl mx-auto lg:mx-0">
+              <div className="mb-5 flex flex-col gap-2 text-left">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-700 text-[10px] md:text-xs font-bold tracking-widest uppercase w-fit shadow-sm mx-auto lg:mx-0">
+                  Zero Enterprise Assistant
+                </div>
+                <h3 className="text-xl md:text-2xl font-black text-slate-900 tracking-tight text-center lg:text-left">
+                  What are you looking for today?
+                </h3>
+                <p className="text-sm md:text-base text-slate-500 font-medium text-center lg:text-left">
+                  Search for any <span className="text-indigo-600 font-semibold">service</span>, <span className="text-indigo-600 font-semibold">document</span>, or <span className="text-indigo-600 font-semibold">legal requirement</span>. Zero Enterprise Assistant will guide you instantly.
+                </p>
+              </div>
+              <form onSubmit={handleSearch} className="relative shadow-xl rounded-2xl">
+                <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
+                  <Search className="h-6 w-6 text-slate-400" />
+                </div>
+                <input 
+                  type="text" 
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="block w-full pl-14 pr-32 py-5 rounded-2xl bg-white/90 backdrop-blur-md border border-slate-200 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20 text-slate-900 placeholder-slate-400 font-medium text-lg transition-all outline-none shadow-[0_8px_30px_rgb(0,0,0,0.04)]" 
+                  placeholder="e.g., 'PAN Card banane ke liye kya documents chahiye?'"
+                />
+                {searchQuery && (
+                  <button 
+                    type="button"
+                    onClick={clearSearch}
+                    className="absolute inset-y-0 right-[100px] flex items-center pr-3 text-slate-400 hover:text-slate-600 transition-colors"
+                  >
+                    <X size={20} />
+                  </button>
+                )}
+                <button 
+                  type="submit"
+                  disabled={isAiLoading}
+                  className={`absolute inset-y-2 right-2 px-6 rounded-xl text-white font-bold transition-colors shadow-md ${isAiLoading ? 'bg-indigo-400 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700'}`}>
+                  Search
+                </button>
+              </form>
+              
+              {/* AI Search Results Area */}
+              {hasSearched && (
+                <div className="mt-4 text-left animate-[float_0.5s_ease-out_forwards] translate-y-2 relative z-50">
+                  <div className="p-6 bg-white rounded-2xl shadow-2xl border border-slate-200 relative overflow-hidden">
+                    {/* Subtle top loading bar if AI is thinking */}
+                    {isAiLoading && (
+                      <div className="absolute top-0 left-0 h-1 bg-indigo-500 animate-[pulse_1s_ease-in-out_infinite] w-full"></div>
+                    )}
+                    
+                    <div className="text-sm text-slate-500 mb-4 font-bold border-b border-slate-100 pb-3 flex items-center gap-2">
+                      Zero Enterprise Assistant
+                    </div>
+                    
+                    {isAiLoading ? (
+                      <div className="py-8 text-center flex flex-col items-center justify-center">
+                        <div className="w-8 h-8 border-4 border-indigo-100 border-t-indigo-600 rounded-full animate-spin mb-4"></div>
+                        <p className="text-sm text-slate-600 font-semibold animate-pulse">AI aapke sawal ko samajh raha hai...</p>
+                      </div>
+                    ) : (
+                      <div className="prose prose-slate max-w-none text-slate-700 font-medium leading-relaxed custom-scrollbar max-h-[300px] overflow-y-auto">
+                        {displayedResponse || aiResponse ? (
+                          (displayedResponse || aiResponse).split('\n').map((line, index, arr) => {
+                            // Bold formatting (**) aur extra spaces hatana
+                            let cleanLine = line.replace(/\*\*/g, '').trim();
+                            
+                            // Aakhiri line ke liye blinking cursor add karna
+                            const isLast = index === arr.length - 1;
+                            const cursor = (isTyping && isLast) ? <span className="inline-block w-1.5 h-4 ml-1 bg-indigo-600 animate-pulse align-middle rounded-sm"></span> : null;
+                            
+                            if (!cleanLine && !isLast) return null;
+                            
+                            // Check karna ki line star (*) ya dash (-) se shuru ho rahi hai kya
+                            const isListItem = cleanLine.startsWith('*') || cleanLine.startsWith('-');
+                            
+                            if (isListItem) {
+                              // Shuru ka star/dash hatana
+                              cleanLine = cleanLine.replace(/^[\*\-]\s*/, '');
+                              return (
+                                <div key={index} className="flex items-start gap-2 mb-2">
+                                  <ChevronRight size={18} className="text-indigo-500 mt-0.5 flex-shrink-0" />
+                                  <p>{cleanLine}{cursor}</p>
+                                </div>
+                              );
+                            }
+                            
+                            return (
+                              <p key={index} className="mb-2 min-h-[1.5rem]">
+                                {cleanLine}{cursor}
+                              </p>
+                            );
+                          })
+                        ) : (
+                          <p className="text-red-500">Kuch technical issue aa gaya hai. Kripya dobara try karein.</p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              <div className="mt-6 flex flex-wrap justify-center lg:justify-start gap-2 text-xs font-semibold text-slate-600 relative z-40">
+                <span onClick={() => handleQuickSearch("PAN Card banane ka process batao")} className="px-3 py-1.5 rounded-full border border-slate-200 bg-white/60 backdrop-blur-sm cursor-pointer hover:border-indigo-500 hover:text-indigo-600 shadow-sm transition-all">Apply PAN Card</span>
+                <span onClick={() => handleQuickSearch("MSME Udyam registration ke kya fayde hain?")} className="px-3 py-1.5 rounded-full border border-slate-200 bg-white/60 backdrop-blur-sm cursor-pointer hover:border-indigo-500 hover:text-indigo-600 shadow-sm transition-all">MSME Registration</span>
+                <span onClick={() => handleQuickSearch("Mujhe flight ticket book karni hai")} className="px-3 py-1.5 rounded-full border border-slate-200 bg-white/60 backdrop-blur-sm cursor-pointer hover:border-indigo-500 hover:text-indigo-600 shadow-sm transition-all">Flight Ticket</span>
+                <span onClick={() => handleQuickSearch("Driving license apply karne ke liye required documents?")} className="px-3 py-1.5 rounded-full border border-slate-200 bg-white/60 backdrop-blur-sm cursor-pointer hover:border-indigo-500 hover:text-indigo-600 shadow-sm transition-all">Driving License</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      {/* --- THE PHILOSOPHY / ABOUT SECTION --- */}
+      {/* Upar ka padding (pt) bilkul kam kiya gaya hai taaki gap khatam ho */}
+      <section id="about" className="relative z-10 pt-6 pb-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+            <div>
+              <div className="w-16 h-1 bg-gradient-to-r from-indigo-500 to-purple-500 mb-6 rounded-full"></div>
+              <p className="text-slate-600 leading-relaxed mb-6 font-medium text-lg">
+                Every massive startup, every vital legal document, and every great empire starts from a single point: Zero. 
+              </p>
+              <p className="text-slate-600 leading-relaxed font-medium">
+                Since 2018, starting as a local e-Mitra hub in Rajasthan, we have evolved into a comprehensive Tech & Legal Service ecosystem. We handle the ground-level complexities—from Jan Aadhaar integrations to GST filings—so you don't have to.
+              </p>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm border-t-4 border-t-indigo-500 text-center hover:shadow-md transition-shadow">
+                <div className="text-4xl font-black text-slate-800 mb-2">8+</div>
+                <div className="text-sm text-slate-500 font-bold uppercase tracking-wide">Years Exp.</div>
+              </div>
+              <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm border-t-4 border-t-blue-500 text-center hover:shadow-md transition-shadow">
+                <div className="text-4xl font-black text-slate-800 mb-2">25+</div>
+                <div className="text-sm text-slate-500 font-bold uppercase tracking-wide">Core Services</div>
+              </div>
+              <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm border-t-4 border-t-emerald-500 text-center hover:shadow-md transition-shadow">
+                <div className="text-4xl font-black text-slate-800 mb-2">10k+</div>
+                <div className="text-sm text-slate-500 font-bold uppercase tracking-wide">Citizens Served</div>
+              </div>
+              <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm border-t-4 border-t-purple-500 text-center hover:shadow-md transition-shadow">
+                <div className="text-4xl font-black text-slate-800 mb-2">100%</div>
+                <div className="text-sm text-slate-500 font-bold uppercase tracking-wide">Client Trust</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* --- SERVICES ECOSYSTEM SECTION --- */}
+      {/* Upar ka gap kam kiya gaya (pt-8) */}
+      <section id="services" className="pt-8 pb-24 relative z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+          <div className="text-center mb-16">
+            <h2 className="text-sm font-bold text-indigo-600 tracking-widest uppercase mb-2">Our Expertise</h2>
+            <h3 className="text-3xl md:text-5xl font-black text-slate-900">Services We <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">Provide</span></h3>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            
+            {/* Service 1: Gov-Tech */}
+            <div className="bg-slate-50 border border-slate-200 p-8 rounded-3xl card-hover group cursor-pointer shadow-sm">
+              <div className="w-14 h-14 rounded-2xl bg-indigo-100 flex items-center justify-center mb-6 group-hover:bg-indigo-600 transition-all duration-300">
+                <ShieldCheck className="text-indigo-600 group-hover:text-white transition-colors" size={28} />
+              </div>
+              <h4 className="text-xl font-bold mb-3 text-slate-900">Gov-Tech Hub</h4>
+              <p className="text-sm text-slate-600 mb-6 font-medium">Seamless integration with G2C portals for rapid civil documentation.</p>
+              <ul className="text-sm text-slate-700 space-y-3 font-medium">
+                <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-indigo-500 rounded-full"></div> Jan Aadhaar & Ration</li>
+                <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-indigo-500 rounded-full"></div> Voter ID & PAN Card</li>
+                <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-indigo-500 rounded-full"></div> Caste & Income Cert.</li>
+                <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-indigo-500 rounded-full"></div> Govt. Scholarship</li>
+              </ul>
+            </div>
+
+            {/* Service 2: Fin-Suite */}
+            <div className="bg-slate-50 border border-slate-200 p-8 rounded-3xl card-hover group cursor-pointer shadow-sm">
+              <div className="w-14 h-14 rounded-2xl bg-emerald-100 flex items-center justify-center mb-6 group-hover:bg-emerald-500 transition-all duration-300">
+                <CreditCard className="text-emerald-600 group-hover:text-white transition-colors" size={28} />
+              </div>
+              <h4 className="text-xl font-bold mb-3 text-slate-900">Fin-Suite</h4>
+              <p className="text-sm text-slate-600 mb-6 font-medium">Real-time banking, utility payments, and fiscal management tools.</p>
+              <ul className="text-sm text-slate-700 space-y-3 font-medium">
+                <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-emerald-500 rounded-full"></div> AEPS Withdrawals</li>
+                <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-emerald-500 rounded-full"></div> Instant Money Transfer</li>
+                <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-emerald-500 rounded-full"></div> Utility & Insurance Bills</li>
+                <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-emerald-500 rounded-full"></div> ITR Filing & Tax</li>
+              </ul>
+            </div>
+
+            {/* Service 3: Corporate Legal */}
+            <div className="bg-slate-50 border border-slate-200 p-8 rounded-3xl card-hover group cursor-pointer shadow-sm">
+              <div className="w-14 h-14 rounded-2xl bg-amber-100 flex items-center justify-center mb-6 group-hover:bg-amber-500 transition-all duration-300">
+                <Briefcase className="text-amber-600 group-hover:text-white transition-colors" size={28} />
+              </div>
+              <h4 className="text-xl font-bold mb-3 text-slate-900">Corporate Legal</h4>
+              <p className="text-sm text-slate-600 mb-6 font-medium">End-to-end business registration, compliance, and document drafting.</p>
+              <ul className="text-sm text-slate-700 space-y-3 font-medium">
+                <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-amber-500 rounded-full"></div> GST Registration</li>
+                <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-amber-500 rounded-full"></div> MSME/Udyam Setup</li>
+                <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-amber-500 rounded-full"></div> Legal Affidavits</li>
+                <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-amber-500 rounded-full"></div> Digital Signature (DSC)</li>
+              </ul>
+            </div>
+
+            {/* Service 4: Global Mobility */}
+            <div className="bg-slate-50 border border-slate-200 p-8 rounded-3xl card-hover group cursor-pointer shadow-sm">
+              <div className="w-14 h-14 rounded-2xl bg-purple-100 flex items-center justify-center mb-6 group-hover:bg-purple-600 transition-all duration-300">
+                <PlaneTakeoff className="text-purple-600 group-hover:text-white transition-colors" size={28} />
+              </div>
+              <h4 className="text-xl font-bold mb-3 text-slate-900">Global Mobility</h4>
+              <p className="text-sm text-slate-600 mb-6 font-medium">Advanced travel APIs for global and domestic transit and bookings.</p>
+              <ul className="text-sm text-slate-700 space-y-3 font-medium">
+                <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-purple-500 rounded-full"></div> IRCTC Rail Tickets</li>
+                <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-purple-500 rounded-full"></div> Domestic Flights</li>
+                <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-purple-500 rounded-full"></div> International Airfare</li>
+                <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-purple-500 rounded-full"></div> Passport Processing</li>
+              </ul>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      {/* --- FOOTER --- */}
+      <footer className="relative z-10 pt-16 pb-8 border-t border-slate-200 overflow-hidden">
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-500"></div>
+        
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+            
+            <div className="col-span-1 md:col-span-1">
+              <div className="flex items-center gap-2 mb-4 group cursor-pointer">
+                {/* Modern Tech Zero Logo (Footer) */}
+                <div className="relative w-8 h-8 flex items-center justify-center bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg shadow-sm transition-transform duration-300 group-hover:scale-105">
+                  <div className="absolute w-3.5 h-[18px] border-2 border-white rounded-[3px]"></div>
+                  <div className="absolute w-5 h-[2px] bg-white transform -rotate-45 rounded-full"></div>
+                </div>
+                <span className="text-lg font-light tracking-wider text-indigo-600 ml-1 font-inter">ZERO ENTERPRISE</span>
+              </div>
+              <p className="text-slate-600 text-sm mb-6 leading-relaxed font-medium">
+                Empowering Rajasthan digitally since 2018. The ultimate zero-to-hero gateway for all your G2C, B2B, and FinTech needs.
+              </p>
+              <div className="flex gap-4">
+                {/* Social Placeholders */}
+                <div className="w-10 h-10 rounded-full bg-slate-50 hover:bg-indigo-50 border border-slate-200 cursor-pointer transition-colors flex items-center justify-center text-slate-600 hover:text-indigo-600 font-bold shadow-sm">
+                  f
+                </div>
+                <div className="w-10 h-10 rounded-full bg-slate-50 hover:bg-indigo-50 border border-slate-200 cursor-pointer transition-colors flex items-center justify-center text-slate-600 hover:text-indigo-600 font-bold shadow-sm">
+                  in
+                </div>
+                <div className="w-10 h-10 rounded-full bg-slate-50 hover:bg-indigo-50 border border-slate-200 cursor-pointer transition-colors flex items-center justify-center text-slate-600 hover:text-indigo-600 font-bold shadow-sm">
+                  X
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <h4 className="text-slate-900 font-bold mb-5 text-lg">Ecosystem</h4>
+              <ul className="space-y-3 text-sm text-slate-600 font-medium">
+                <li><a href="#services" className="hover:text-indigo-600 transition-colors block">Gov-Tech Services</a></li>
+                <li><a href="#services" className="hover:text-indigo-600 transition-colors block">Financial Suite</a></li>
+                <li><a href="#services" className="hover:text-indigo-600 transition-colors block">Legal & Compliance</a></li>
+                <li><a href="#services" className="hover:text-indigo-600 transition-colors block">Travel API Integrations</a></li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="text-slate-900 font-bold mb-5 text-lg">Company</h4>
+              <ul className="space-y-3 text-sm text-slate-600 font-medium">
+                <li><a href="#about" className="hover:text-indigo-600 transition-colors block">About Us</a></li>
+                <li><a href="#home" className="hover:text-indigo-600 transition-colors block">Careers</a></li>
+                <li><a href="#home" className="hover:text-indigo-600 transition-colors block">Privacy Policy</a></li>
+                <li><a href="#home" className="hover:text-indigo-600 transition-colors block">Terms of Service</a></li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="text-slate-900 font-bold mb-5 text-lg">Contact Us</h4>
+              <ul className="space-y-3 text-sm text-slate-600 font-semibold bg-slate-50 p-4 rounded-xl border border-slate-200">
+                <li className="flex items-center gap-2"><div className="w-2 h-2 bg-indigo-500 rounded-full"></div> Address: Rajasthan, India</li>
+                <li className="flex items-center gap-2"><div className="w-2 h-2 bg-emerald-500 rounded-full"></div> Phone: +91 73403 37074</li>
+                <li className="flex items-center gap-2"><div className="w-2 h-2 bg-purple-500 rounded-full"></div> Email: info@zeroenterprise.com</li>
+              </ul>
+            </div>
+
+          </div>
+          
+          <div className="text-center text-sm font-medium text-slate-500 border-t border-slate-200 pt-8">
+            &copy; {new Date().getFullYear()} Zero Enterprise. All rights reserved.
+          </div>
+        </div>
+      </footer>
+
+    </div>
+  );
+}

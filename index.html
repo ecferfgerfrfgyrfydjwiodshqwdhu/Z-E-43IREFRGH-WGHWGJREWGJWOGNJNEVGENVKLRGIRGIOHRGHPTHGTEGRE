@@ -50,6 +50,26 @@
       -webkit-text-fill-color: transparent;
     }
     
+    /* --- NEW CSS FOR NEWS TICKER ANIMATION --- */
+    .marquee-container {
+      overflow: hidden;
+      white-space: nowrap;
+      width: 100%;
+      display: flex;
+      align-items: center;
+    }
+    .marquee-content {
+      display: inline-flex;
+      animation: marquee 40s linear infinite;
+    }
+    .marquee-content:hover {
+      animation-play-state: paused;
+    }
+    @keyframes marquee {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+    
     html { scroll-behavior: smooth; }
     body { background-color: #ffffff; color: #0f172a; font-family: 'Montserrat', sans-serif; overflow-x: hidden; }
     
@@ -66,7 +86,7 @@
 
   <!-- React JSX Code -->
   <script type="text/babel">
-    const { useState, useEffect } = React;
+    const { useState, useEffect, useRef } = React;
 
     // --- SVG Icons (Lucide Icons replacement for browser compatibility) ---
     const ChevronRight = ({ size = 24, className = "" }) => (
@@ -93,6 +113,85 @@
     const PlaneTakeoff = ({ size = 24, className = "" }) => (
       <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M2 22h20"></path><path d="M6.36 17.4 4 17l-2-4 1.1-.55a2 2 0 0 1 1.8 0l.17.1a2 2 0 0 0 1.8 0L8 12l5-5 1.5-1.5a2.83 2.83 0 1 1 4 4L17 11l-1.5 1.5-1.87 1.87a2 2 0 0 0 0 1.8l.1.17a2 2 0 0 1 0 1.8l-.55 1.1-4-2-4 2.36Z"></path></svg>
     );
+    const FileText = ({ size = 24, className = "" }) => (
+      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg>
+    );
+    const Scale = ({ size = 24, className = "" }) => (
+      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"></path><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"></path><path d="M7 21h10"></path><path d="M12 3v18"></path><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"></path></svg>
+    );
+    const ClipboardList = ({ size = 24, className = "" }) => (
+      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect width="8" height="4" x="8" y="2" rx="1" ry="1"></rect><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><path d="M12 11h4"></path><path d="M12 16h4"></path><path d="M8 11h.01"></path><path d="M8 16h.01"></path></svg>
+    );
+    const ShoppingCart = ({ size = 24, className = "" }) => (
+      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="8" cy="21" r="1"></circle><circle cx="19" cy="21" r="1"></circle><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"></path></svg>
+    );
+    const Umbrella = ({ size = 24, className = "" }) => (
+      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M22 12a10.06 10.06 1 0 0-20 0Z"/><path d="M12 12v8a2 2 0 0 0 4 0"/><path d="M12 2v1"/></svg>
+    );
+    const Landmark = ({ size = 24, className = "" }) => (
+      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="3" x2="21" y1="22" y2="22"/><line x1="6" x2="6" y1="18" y2="11"/><line x1="10" x2="10" y1="18" y2="11"/><line x1="14" x2="14" y1="18" y2="11"/><line x1="18" x2="18" y1="18" y2="11"/><polygon points="12 2 20 7 4 7"/></svg>
+    );
+    const Banknote = ({ size = 24, className = "" }) => (
+      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect width="20" height="12" x="2" y="6" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg>
+    );
+
+    // --- NEW 10 ICONS ADDED ---
+    const Calculator = ({ size = 24, className = "" }) => (
+      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect width="16" height="20" x="4" y="2" rx="2"/><line x1="8" x2="16" y1="6" y2="6"/><line x1="16" x2="16" y1="14" y2="18"/><path d="M16 10h.01"/><path d="M12 10h.01"/><path d="M8 10h.01"/><path d="M12 14h.01"/><path d="M8 14h.01"/><path d="M12 18h.01"/><path d="M8 18h.01"/></svg>
+    );
+    const GraduationCap = ({ size = 24, className = "" }) => (
+      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M21.42 10.922a2 2 0 0 0-.019-3.838L12.83 4.34a2 2 0 0 0-1.66 0L2.6 7.08a2 2 0 0 0 0 3.832l8.57 3.698a2 2 0 0 0 1.66 0z"/><path d="M22 10v6"/><path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5"/></svg>
+    );
+    const Sprout = ({ size = 24, className = "" }) => (
+      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M7 20h10"/><path d="M10 20c5.5-2.5.8-6.4 3-10"/><path d="M9.5 9.4c1.1.8 1.8 2.2 2.3 3.7-2 .4-3.6.4-4.3-.2Z"/><path d="M14.1 6a7 7 0 0 0-1.1 4c1.9-.1 3.3-.6 4.3-1.4 1-1 1.6-2.3 1.7-4.6-2.7.1-4 1-4.9 2Z"/></svg>
+    );
+    const Globe = ({ size = 24, className = "" }) => (
+      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+    );
+    const Building = ({ size = 24, className = "" }) => (
+      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect x="4" y="2" width="16" height="20" rx="2" ry="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M12 6h.01"/><path d="M12 10h.01"/><path d="M12 14h.01"/><path d="M16 10h.01"/><path d="M16 14h.01"/><path d="M8 10h.01"/><path d="M8 14h.01"/></svg>
+    );
+    const Megaphone = ({ size = 24, className = "" }) => (
+      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg>
+    );
+    const HomeIcon = ({ size = 24, className = "" }) => (
+      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    );
+    const Users = ({ size = 24, className = "" }) => (
+      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    );
+    const HeartPulse = ({ size = 24, className = "" }) => (
+      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/><path d="M3.22 12H9.5l.5-1 2 4.5 2-7 1.5 3.5h5.27"/></svg>
+    );
+    const Key = ({ size = 24, className = "" }) => (
+      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6"/><path d="m15.5 7.5 3 3L22 7l-3-3"/></svg>
+    );
+    const MicIcon = ({ size = 24, className = "" }) => (
+      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="22"></line></svg>
+    );
+
+    // --- NEW 8 ICONS FOR EXTRA SERVICES ---
+    const Car = ({ size = 24, className = "" }) => (
+      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></svg>
+    );
+    const HeartHandshake = ({ size = 24, className = "" }) => (
+      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/><path d="M12 5 9.04 7.96a2.17 2.17 0 0 0 0 3.08v0c.82.82 2.13.85 3 .07l2.07-1.9a2.82 2.82 0 0 1 3.79 0l2.96 2.66"/><path d="m18 15-2-2"/><path d="m15 18-2-2"/></svg>
+    );
+    const ShieldHeart = ({ size = 24, className = "" }) => (
+      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M12 14.5c1.5-1.5 3.5-2.5 3.5-4.5A2.5 2.5 0 0 0 13 7.5c-1 0-1.5.5-2.5 1.5-1-1-1.5-1.5-2.5-1.5A2.5 2.5 0 0 0 8.5 10c0 2 2 3 3.5 4.5z"/></svg>
+    );
+    const Rocket = ({ size = 24, className = "" }) => (
+      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg>
+    );
+    const Ship = ({ size = 24, className = "" }) => (
+      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M2 21c.6.5 1.2 1 2.5 1 2.5 0 3.25-1.5 5.5-1.5s3 1.5 5.5 1.5c1.3 0 1.9-.5 2.5-1"/><path d="M19.38 20A11.6 11.6 0 0 0 21 14l-9-4-9 4c0 2.9.94 5.34 2.81 7.76"/><path d="M19 13V7a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v6"/><path d="M12 10v4"/><path d="M12 2v3"/></svg>
+    );
+    const Handshake = ({ size = 24, className = "" }) => (
+      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="m11 17 2 2a1 1 0 1 0 3-3"/><path d="m14 14 2.5 2.5a1 1 0 1 0 3-3l-3.88-3.88a3 3 0 0 0-4.24 0l-.88.88a1 1 0 1 1-3-3l2.81-2.81a5.79 5.79 0 0 1 7.06-.87l.47.28a2 2 0 0 0 1.42.25L21 4"/><path d="m21 3-6 6"/><path d="m21 16-1.87.62a2 2 0 0 0-1.25 1.4l-.51 2.05a1 1 0 0 1-1.92.2L14 17"/><path d="m3 21 4-4"/><path d="m3 3 4 4"/><path d="M9 13.522 6 11"/><path d="M12.478 15 14 18"/></svg>
+    );
+    const Store = ({ size = 24, className = "" }) => (
+      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7"/><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="M15 22v-4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4"/><path d="M2 7h20"/><path d="M22 7v3a2 2 0 0 1-2 2v0a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 16 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 12 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 8 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 4 12v0a2 2 0 0 1-2-2V7"/></svg>
+    );
 
     // --- Main App Component ---
     function App() {
@@ -103,14 +202,66 @@
       const [aiResponse, setAiResponse] = useState(null);
       const [isAiLoading, setIsAiLoading] = useState(false);
       const [hasSearched, setHasSearched] = useState(false);
+      const [isRecording, setIsRecording] = useState(false);
       
       const [displayedResponse, setDisplayedResponse] = useState('');
       const [isTyping, setIsTyping] = useState(false);
+
+      // --- CHAT MEMORY STATE ---
+      const [chatHistory, setChatHistory] = useState([]);
+
+      // --- AUTOMATIC NEWS TICKER STATE ---
+      // Ab array mein title ke sath link bhi store karenge
+      const [newsItems, setNewsItems] = useState([
+        { title: "PM Surya Ghar Muft Bijli Yojana: Apply online for rooftop solar subsidy.", link: "#" },
+        { title: "MSME Udyam Registration is now mandatory for priority sector lending.", link: "#" },
+        { title: "Income Tax Return (ITR) filing dates for new financial year announced.", link: "#" },
+        { title: "Rajasthan Govt launches new digital schemes through e-Mitra portals.", link: "#" }
+      ]);
+
+      // Voice recognition ka reference store karne ke liye
+      const recognitionRef = useRef(null);
+      // Purana text store karne ke liye naya reference add kiya hai
+      const initialTextRef = useRef('');
 
       useEffect(() => {
         const handleScroll = () => setIsScrolled(window.scrollY > 50);
         window.addEventListener('scroll', handleScroll);
         return () => window.removeEventListener('scroll', handleScroll);
+      }, []);
+
+      // --- FETCH LIVE NEWS FROM GOOGLE AUTOMATICALLY ---
+      useEffect(() => {
+        const fetchLiveNews = async () => {
+          try {
+            // Google News Business (Hindi/India) ka RSS feed
+            const rssUrl = encodeURIComponent('https://news.google.com/rss/headlines/section/topic/BUSINESS?hl=hi&gl=IN&ceid=IN:hi');
+            // RSS ko JSON mein convert karne ke liye free API
+            const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${rssUrl}`);
+            const data = await res.json();
+            
+            if (data.status === 'ok' && data.items.length > 0) {
+              // Top 5 news nikal kar title se channel ka naam hatana aur link set karna
+              const liveNews = data.items.slice(0, 5).map(item => {
+                let cleanTitle = item.title;
+                // Google News aksar title ke aakhir mein " - Channel Name" lagata hai
+                const lastDashIndex = cleanTitle.lastIndexOf(' - ');
+                if (lastDashIndex !== -1) {
+                  cleanTitle = cleanTitle.substring(0, lastDashIndex);
+                }
+                return {
+                  title: cleanTitle,
+                  link: item.link
+                };
+              });
+              setNewsItems(liveNews);
+            }
+          } catch (error) {
+            console.log("Live news load nahi ho payi, default news dikha rahe hain.");
+          }
+        };
+        
+        fetchLiveNews();
       }, []);
 
       useEffect(() => {
@@ -136,22 +287,102 @@
         return () => clearInterval(intervalId);
       }, [aiResponse]);
 
-      const fetchGeminiResponse = async (query) => {
+      // --- Voice to Text Logic ---
+      const handleVoiceSearch = () => {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        
+        if (!SpeechRecognition) {
+          setHasSearched(true);
+          setAiResponse("Maaf kijiye, aapka browser voice search support nahi karta. Kripya Chrome ya Edge ka istemal karein.");
+          return;
+        }
+
+        // Agar pehle se record ho raha hai, toh use stop karein
+        if (isRecording) {
+          if (recognitionRef.current) {
+            recognitionRef.current.stop();
+          }
+          setIsRecording(false);
+          return;
+        }
+
+        const recognition = new SpeechRecognition();
+        recognitionRef.current = recognition;
+        recognition.lang = 'hi-IN'; // Hindi / Hinglish detect karne ke liye
+        
+        // Real-time text show karne ke liye interimResults ko true kar diya hai
+        recognition.interimResults = true; 
+        // Continuous true karne se beech mein pause lene par mic band nahi hoga
+        recognition.continuous = true; 
+        recognition.maxAlternatives = 1;
+
+        // Recording shuru hone se pehle, jo text pehle se likha hai use save kar lein
+        initialTextRef.current = searchQuery;
+
+        recognition.onresult = (event) => {
+          let currentTranscript = '';
+          for (let i = 0; i < event.results.length; i++) {
+            currentTranscript += event.results[i][0].transcript;
+          }
+          
+          // Purane text ke sath naya text jod dein (with space)
+          const newText = initialTextRef.current 
+            ? initialTextRef.current + ' ' + currentTranscript 
+            : currentTranscript;
+            
+          setSearchQuery(newText);
+        };
+
+        recognition.onerror = (event) => {
+          console.error("Speech recognition error", event.error);
+          setIsRecording(false);
+        };
+
+        recognition.onend = () => {
+          setIsRecording(false);
+        };
+
+        recognition.start();
+        setIsRecording(true);
+        // Yahan se purana text clear karne wala code hata diya gaya hai
+      };
+
+      const fetchGeminiResponse = async (query, currentHistory) => {
         const apiKey = ""; 
         const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
         const delays = [1000, 2000, 4000, 8000, 16000];
 
         const systemPrompt = `Aap 'Zero Enterprise' ke smart AI Assistant hain. Zero Enterprise 2018 se Rajasthan mein e-services de rahi hai.
-        Hamari main services:
-        1. Gov-Tech: Jan Aadhaar, Ration Card, Voter ID, PAN Card, Caste/Income Certificate, Scholarship, Driving License.
-        2. Fin-Suite: AEPS Withdrawals, Money Transfer, Utility/Insurance Bills, ITR Filing & Tax.
-        3. Corporate Legal: GST Registration, MSME/Udyam Setup, Legal Affidavits, Digital Signature (DSC).
-        4. Global Mobility: IRCTC Rail Tickets, Flight Tickets, Passport Processing.
+        Hamari 21 main services hain:
+        1. Government Registration: Birth Certificate, Aadhar Card, PAN Card, Family Card.
+        2. Fin-Suite: AEPS, Money Transfer, Utility Bills.
+        3. Corporate Legal & Registrations: GST, MSME, Shop Act, FSSAI, ISO, NGO/Trust, Trademark, Copyright, Legal Notices.
+        4. Global Mobility & Visa: IRCTC, Flights, Visas (Tourist/Student/Work), Passport.
+        5. Paperwork: Rent Agreements, Affidavits, Notary, E-Stamp.
+        6. E-Commerce: Amazon/Flipkart Listing, Product Cataloging.
+        7. Insurance & Finance: Health/Life/Vehicle Insurance, Mutual Funds, FD, Demat.
+        8. Loans: Personal, Business, Home, Auto, MSME Mudra Loans.
+        9. Taxation & Auditing: ITR, TDS, GST Returns, Balance Sheets, Company Audit.
+        10. Education: College Admissions, Scholarships, Exam Forms.
+        11. Agri-Tech (Farmers): PM Kisan Samman Nidhi, KCC, Fasal Bima, Subsidy.
+        12. B2B Tendering: GeM Seller Registration, e-Tenders.
+        13. Digital Marketing: Website Development, Logo Design, Social Media Ads.
+        14. Real Estate: Property Registry, Lease Deeds, RERA, Title Search.
+        15. Employment: Govt Jobs Application, Resume Making, PF Withdrawal, ESI.
+        16. Healthcare: Ayushman Bharat, Chiranjeevi Card, Health Checkup.
+        17. Cyber & DSC: Class 3 DSC Generation, Cyber Fraud Reporting.
 
         User ke sawalo ka jawab professional, helpful aur clear tareeqe se dein. Agar user kisi service ke baare me pooche, toh process ya required documents ki brief jankari dein. Jawab Hinglish (Hindi in English script) mein hona chahiye taaki local logo ko samajh aaye. Jawab points mein de sakte hain lekin lamba nahi hona chahiye.`;
 
+        // Purani history ko Gemini ke format mein badalna
+        const formattedHistory = currentHistory.map(msg => ({
+          role: msg.role,
+          parts: [{ text: msg.text }]
+        }));
+
+        // Payload mein history aur naya sawal dono bhejna
         const payload = {
-          contents: [{ parts: [{ text: query }] }],
+          contents: [...formattedHistory, { role: "user", parts: [{ text: query }] }],
           systemInstruction: { parts: [{ text: systemPrompt }] }
         };
 
@@ -176,13 +407,21 @@
         if (e) e.preventDefault();
         if (!searchQuery.trim()) return;
 
+        const currentQuery = searchQuery;
         setHasSearched(true);
         setIsAiLoading(true);
         setAiResponse(null);
 
         try {
-          const responseText = await fetchGeminiResponse(searchQuery);
+          const responseText = await fetchGeminiResponse(currentQuery, chatHistory);
           setAiResponse(responseText);
+          
+          // Jawab aane ke baad sawal aur jawab dono ko memory mein save karna
+          setChatHistory(prev => [
+            ...prev,
+            { role: "user", text: currentQuery },
+            { role: "model", text: responseText }
+          ]);
         } catch (error) {
           setAiResponse("Network error! Kripya thodi der baad dobara koshish karein.");
         } finally {
@@ -201,6 +440,7 @@
         setDisplayedResponse('');
         setIsTyping(false);
         setHasSearched(false);
+        setChatHistory([]); // Clear button dabane par purani memory bhi clear ho jayegi
       };
 
       return (
@@ -213,7 +453,8 @@
             <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'radial-gradient(#ec4899 1px, transparent 1px)', backgroundSize: '30px 30px' }}></div>
           </div>
 
-          <nav className={`fixed w-full z-50 transition-all duration-300 ${isScrolled ? 'glass-panel py-3 shadow-md' : 'bg-transparent py-5'}`}>
+          {/* Nav se 'fixed' hatakar 'absolute' kar diya gaya hai */}
+          <nav className={`absolute w-full z-50 transition-all duration-300 border-b border-slate-200 ${isScrolled ? 'glass-panel py-3 shadow-md' : 'bg-white/40 backdrop-blur-md py-5'}`}>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <div className="flex justify-between items-center">
                 <div className="flex items-center gap-2 cursor-pointer group">
@@ -221,18 +462,16 @@
                     <div className="absolute w-4 h-5 border-2 border-white rounded-[4px]"></div>
                     <div className="absolute w-6 h-[2px] bg-white transform -rotate-45 rounded-full"></div>
                   </div>
-                  <span className="text-xl font-light tracking-wider text-indigo-600 ml-1 font-inter">
+                  <span className="text-xl font-bold tracking-wider text-indigo-600 ml-1 font-inter">
                     ZERO ENTERPRISE
                   </span>
                 </div>
 
                 <div className="hidden md:flex space-x-8 items-center text-sm font-semibold text-slate-600">
-                  <a href="#home" className="hover:text-indigo-600 transition-colors">Ecosystem</a>
+                  <a href="#home" className="hover:text-indigo-600 transition-colors">Home</a>
+                  <a href="#about" className="hover:text-indigo-600 transition-colors">About Us</a>
                   <a href="#services" className="hover:text-indigo-600 transition-colors">Services</a>
-                  <a href="#about" className="hover:text-indigo-600 transition-colors">Our Legacy</a>
-                  <button className="px-5 py-2 rounded-full bg-indigo-50 border border-indigo-200 text-indigo-700 hover:bg-indigo-600 hover:text-white transition-all duration-300 shadow-sm">
-                    Track Application
-                  </button>
+                  <a href="#contact" className="hover:text-indigo-600 transition-colors">Contact</a>
                 </div>
 
                 <div className="md:hidden">
@@ -244,73 +483,120 @@
             </div>
 
             {mobileMenuOpen && (
-              <div className="md:hidden glass-panel absolute top-full left-0 w-full py-4 px-4 flex flex-col gap-4 border-t border-slate-200 shadow-lg">
-                <a href="#home" className="text-slate-700 hover:text-indigo-600 font-medium">Ecosystem</a>
-                <a href="#services" className="text-slate-700 hover:text-indigo-600 font-medium">Services</a>
-                <a href="#about" className="text-slate-700 hover:text-indigo-600 font-medium">Our Legacy</a>
-                <button className="w-full px-5 py-2 rounded-md bg-indigo-50 border border-indigo-200 text-indigo-700 font-medium hover:bg-indigo-600 hover:text-white">
-                  Track Application
-                </button>
+              <div className="md:hidden glass-panel absolute top-full left-0 w-full py-4 px-4 flex flex-col gap-4 border-t border-slate-200 shadow-lg text-center items-center">
+                <a href="#home" className="text-slate-700 hover:text-indigo-600 font-medium w-full py-2">Home</a>
+                <a href="#about" className="text-slate-700 hover:text-indigo-600 font-medium w-full py-2">About Us</a>
+                <a href="#services" className="text-slate-700 hover:text-indigo-600 font-medium w-full py-2">Services</a>
+                <a href="#contact" className="text-slate-700 hover:text-indigo-600 font-medium w-full py-2">Contact</a>
               </div>
             )}
           </nav>
 
-          <section id="home" className="relative z-10 pt-32 pb-8 lg:pt-48 lg:pb-10 overflow-hidden">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative flex flex-col lg:flex-row items-center gap-16">
+          {/* --- AUTOMATIC LIVE NEWS TICKER --- */}
+          <div className="absolute top-[75px] md:top-[85px] w-full bg-indigo-600 text-white z-40 flex items-center shadow-md">
+            <div className="bg-indigo-900 px-4 py-2 font-bold text-xs tracking-wider z-10 shadow-[10px_0_10px_-5px_rgba(0,0,0,0.5)] whitespace-nowrap flex items-center gap-2 cursor-default">
+              <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+              LATEST UPDATES
+            </div>
+            <div className="marquee-container py-2 text-sm font-medium cursor-pointer">
+              {/* Gap aur Padding kam kiya gaya hai: gap-4 pr-4 */}
+              <div className="marquee-content flex gap-4 pr-4">
+                {/* Seamless loop ke liye do baar render kiya gaya hai */}
+                {newsItems.map((news, index) => (
+                  <span key={`a-${index}`} className="flex items-center gap-2">
+                    <a href={news.link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-indigo-200 transition-colors group" title="Poori khabar padhne ke liye click karein">
+                      <span>{news.title}</span>
+                      <span className="text-[9px] font-light text-white/60 group-hover:text-white/90 uppercase tracking-widest whitespace-nowrap transition-all ml-1">
+                        Read More ↗
+                      </span>
+                    </a>
+                    {/* Yahan dot ke pehle ka margin ml-8 se ml-4 kar diya hai */}
+                    <span className="text-indigo-300 ml-4 text-lg leading-none">•</span>
+                  </span>
+                ))}
+                {newsItems.map((news, index) => (
+                  <span key={`b-${index}`} className="flex items-center gap-2">
+                    <a href={news.link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-indigo-200 transition-colors group" title="Poori khabar padhne ke liye click karein">
+                      <span>{news.title}</span>
+                      <span className="text-[9px] font-light text-white/60 group-hover:text-white/90 uppercase tracking-widest whitespace-nowrap transition-all ml-1">
+                        Read More ↗
+                      </span>
+                    </a>
+                    {/* Yahan bhi dot ke pehle ka margin ml-8 se ml-4 kar diya hai */}
+                    <span className="text-indigo-300 ml-4 text-lg leading-none">•</span>
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* --- HERO SECTION CENTERED --- */}
+          <section id="home" className="relative z-10 pt-40 pb-8 lg:pt-48 lg:pb-10 overflow-hidden">
+            <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative flex flex-col items-center justify-center text-center">
               
-              <div className="flex-1 text-center lg:text-left">
+              <div className="w-full flex flex-col items-center">
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full glass-panel border-indigo-200 text-indigo-700 text-xs font-bold tracking-wider mb-6 shadow-sm">
                   <span className="w-2 h-2 rounded-full bg-indigo-600 animate-pulse"></span>
                   EST. 2018 | RAJASTHAN
                 </div>
-                <h1 className="text-5xl lg:text-7xl font-extrabold tracking-tight mb-6 leading-tight text-slate-900">
-                  REDEFINING <br />
-                  <span className="text-gradient">DIGITAL</span> ACCESSIBILITY.
+                
+                <h1 className="text-[5.5vw] md:text-4xl lg:text-5xl xl:text-6xl font-extrabold tracking-tight mb-4 leading-tight text-slate-900 whitespace-nowrap">
+                  WE PROVIDE <span className="text-gradient">E-SERVICES</span>
                 </h1>
-                <p className="text-lg text-slate-600 mb-8 max-w-2xl mx-auto lg:mx-0 leading-relaxed font-medium">
+                
+                <p className="text-lg text-slate-600 mb-8 max-w-2xl mx-auto leading-relaxed font-medium">
                   From complex bureaucracy to seamless digital solutions. We handle Government-to-Citizen services, corporate compliance, and fintech solutions. Everything starts from <span className="text-indigo-600 font-bold">Zero</span>, so you can scale to infinity.
                 </p>
-                <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                  <button className="px-8 py-3 rounded-xl bg-indigo-600 text-white font-bold hover:bg-indigo-700 hover:shadow-[0_10px_25px_rgba(79,70,229,0.3)] transition-all duration-300 flex items-center justify-center gap-2 transform hover:-translate-y-1">
-                    Explore Ecosystem <ChevronRight size={18} />
+                
+                <div className="flex flex-col sm:flex-row gap-4 justify-center w-full mb-12">
+                  <button className="px-8 py-3 rounded-xl bg-indigo-600 text-white font-bold hover:bg-indigo-700 hover:shadow-[0_10px_25px_rgba(79,70,229,0.3)] transition-all duration-300 flex items-center justify-center gap-2 transform hover:-translate-y-1 w-full sm:w-auto">
+                    Explore Services <ChevronRight size={18} />
                   </button>
-                  <button className="px-8 py-3 rounded-xl glass-panel text-slate-800 font-semibold hover:bg-slate-100 transition-all duration-300 flex items-center justify-center gap-2 shadow-sm border border-slate-200">
-                    Consult an Expert
-                  </button>
+                  <a href="#contact" className="px-8 py-3 rounded-xl glass-panel text-slate-800 font-semibold hover:bg-slate-100 transition-all duration-300 flex items-center justify-center gap-2 shadow-sm border border-slate-200 w-full sm:w-auto text-center cursor-pointer">
+                    Get in Touch
+                  </a>
                 </div>
 
-                <div className="mt-12 w-full max-w-2xl mx-auto lg:mx-0">
-                  <div className="mb-5 flex flex-col gap-2 text-left">
-                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-700 text-[10px] md:text-xs font-bold tracking-widest uppercase w-fit shadow-sm mx-auto lg:mx-0">
-                      Zero Enterprise Assistant
-                    </div>
-                    <h3 className="text-xl md:text-2xl font-black text-slate-900 tracking-tight text-center lg:text-left">
+                <div className="w-full max-w-3xl mx-auto">
+                  <div className="mb-6 flex flex-col items-center gap-2">
+                    <h3 className="text-lg md:text-xl font-black text-slate-900 tracking-tight">
                       What are you looking for today?
                     </h3>
-                    <p className="text-sm md:text-base text-slate-500 font-medium text-center lg:text-left">
+                    <p className="text-sm md:text-base text-slate-500 font-medium">
                       Search for any <span className="text-indigo-600 font-semibold">service</span>, <span className="text-indigo-600 font-semibold">document</span>, or <span className="text-indigo-600 font-semibold">legal requirement</span>. Zero Enterprise Assistant will guide you instantly.
                     </p>
                   </div>
-                  <form onSubmit={handleSearch} className="relative shadow-xl rounded-2xl">
+                  
+                  <form onSubmit={handleSearch} className="relative shadow-xl rounded-2xl w-full">
                     <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
-                      <SearchIcon className="h-6 w-6 text-slate-400" />
+                      <SearchIcon className={`h-6 w-6 transition-colors ${isRecording ? 'text-red-500 animate-pulse' : 'text-slate-400'}`} />
                     </div>
                     <input 
                       type="text" 
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="block w-full pl-14 pr-32 py-5 rounded-2xl bg-white/90 backdrop-blur-md border border-slate-200 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20 text-slate-900 placeholder-slate-400 font-medium text-lg transition-all outline-none shadow-[0_8px_30px_rgb(0,0,0,0.04)]" 
-                      placeholder="e.g., 'PAN Card banane ke liye kya documents chahiye?'"
+                      className={`block w-full pl-14 pr-[180px] py-5 rounded-2xl bg-white/90 backdrop-blur-md border ${isRecording ? 'border-red-300 ring-4 ring-red-500/10 text-red-700' : 'border-slate-200 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20 text-slate-900'} placeholder-slate-400 font-medium text-lg transition-all outline-none shadow-[0_8px_30px_rgb(0,0,0,0.04)] text-left`} 
+                      placeholder={isRecording ? "Sun raha hoon... Boliye..." : "Search..."}
                     />
-                    {searchQuery && (
+                    <div className="absolute inset-y-0 right-[125px] flex items-center gap-1">
                       <button 
                         type="button"
-                        onClick={clearSearch}
-                        className="absolute inset-y-0 right-[100px] flex items-center pr-3 text-slate-400 hover:text-slate-600 transition-colors"
+                        onClick={handleVoiceSearch}
+                        className={`p-2 rounded-full transition-all duration-300 ${isRecording ? 'text-red-500 bg-red-100 animate-pulse shadow-inner' : 'text-slate-400 hover:text-indigo-600 hover:bg-indigo-50'}`}
+                        title={isRecording ? "Recording band karein" : "Bol kar likhein"}
                       >
-                        <XIcon size={20} />
+                        <MicIcon size={20} />
                       </button>
-                    )}
+                      {searchQuery && (
+                        <button 
+                          type="button"
+                          onClick={clearSearch}
+                          className="p-2 text-slate-400 hover:text-slate-600 transition-colors rounded-full hover:bg-slate-100"
+                        >
+                          <XIcon size={20} />
+                        </button>
+                      )}
+                    </div>
                     <button 
                       type="submit"
                       disabled={isAiLoading}
@@ -333,7 +619,7 @@
                         {isAiLoading ? (
                           <div className="py-8 text-center flex flex-col items-center justify-center">
                             <div className="w-8 h-8 border-4 border-indigo-100 border-t-indigo-600 rounded-full animate-spin mb-4"></div>
-                            <p className="text-sm text-slate-600 font-semibold animate-pulse">AI aapke sawal ko samajh raha hai...</p>
+                            <p className="text-sm text-slate-600 font-semibold animate-pulse">Zero Enterprise assistant aapke sawal ko samajh raha hai...</p>
                           </div>
                         ) : (
                           <div className="prose prose-slate max-w-none text-slate-700 font-medium leading-relaxed custom-scrollbar max-h-[300px] overflow-y-auto">
@@ -373,7 +659,7 @@
                     </div>
                   )}
 
-                  <div className="mt-6 flex flex-wrap justify-center lg:justify-start gap-2 text-xs font-semibold text-slate-600 relative z-40">
+                  <div className="mt-6 flex flex-wrap justify-center gap-3 text-xs font-semibold text-slate-600 relative z-40">
                     <span onClick={() => handleQuickSearch("PAN Card banane ka process batao")} className="px-3 py-1.5 rounded-full border border-slate-200 bg-white/60 backdrop-blur-sm cursor-pointer hover:border-indigo-500 hover:text-indigo-600 shadow-sm transition-all">Apply PAN Card</span>
                     <span onClick={() => handleQuickSearch("MSME Udyam registration ke kya fayde hain?")} className="px-3 py-1.5 rounded-full border border-slate-200 bg-white/60 backdrop-blur-sm cursor-pointer hover:border-indigo-500 hover:text-indigo-600 shadow-sm transition-all">MSME Registration</span>
                     <span onClick={() => handleQuickSearch("Mujhe flight ticket book karni hai")} className="px-3 py-1.5 rounded-full border border-slate-200 bg-white/60 backdrop-blur-sm cursor-pointer hover:border-indigo-500 hover:text-indigo-600 shadow-sm transition-all">Flight Ticket</span>
@@ -432,13 +718,13 @@
                   <div className="w-14 h-14 rounded-2xl bg-indigo-100 flex items-center justify-center mb-6 group-hover:bg-indigo-600 transition-all duration-300">
                     <ShieldCheck className="text-indigo-600 group-hover:text-white transition-colors" size={28} />
                   </div>
-                  <h4 className="text-xl font-bold mb-3 text-slate-900">Gov-Tech Hub</h4>
+                  <h4 className="text-xl font-bold mb-3 text-slate-900">Government Registration</h4>
                   <p className="text-sm text-slate-600 mb-6 font-medium">Seamless integration with G2C portals for rapid civil documentation.</p>
                   <ul className="text-sm text-slate-700 space-y-3 font-medium">
-                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-indigo-500 rounded-full"></div> Jan Aadhaar & Ration</li>
-                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-indigo-500 rounded-full"></div> Voter ID & PAN Card</li>
-                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-indigo-500 rounded-full"></div> Caste & Income Cert.</li>
-                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-indigo-500 rounded-full"></div> Govt. Scholarship</li>
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-indigo-500 rounded-full"></div> Birth Certificate</li>
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-indigo-500 rounded-full"></div> Aadhar Card</li>
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-indigo-500 rounded-full"></div> PAN Card</li>
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-indigo-500 rounded-full"></div> Family Card</li>
                   </ul>
                 </div>
 
@@ -484,28 +770,400 @@
                   </ul>
                 </div>
 
+                {/* Service 5: Paperwork */}
+                <div className="bg-slate-50 border border-slate-200 p-8 rounded-3xl card-hover group cursor-pointer shadow-sm">
+                  <div className="w-14 h-14 rounded-2xl bg-cyan-100 flex items-center justify-center mb-6 group-hover:bg-cyan-500 transition-all duration-300">
+                    <FileText className="text-cyan-600 group-hover:text-white transition-colors" size={28} />
+                  </div>
+                  <h4 className="text-xl font-bold mb-3 text-slate-900">Paperwork</h4>
+                  <p className="text-sm text-slate-600 mb-6 font-medium">Complete assistance with daily paperwork and official documentation.</p>
+                  <ul className="text-sm text-slate-700 space-y-3 font-medium">
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-cyan-500 rounded-full"></div> Rent Agreements</li>
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-cyan-500 rounded-full"></div> Affidavits & Deeds</li>
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-cyan-500 rounded-full"></div> Notary Services</li>
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-cyan-500 rounded-full"></div> E-Stamp Papers</li>
+                  </ul>
+                </div>
+
+                {/* Agri-Tech Section (Moved here below Paperwork) */}
+                <div className="bg-slate-50 border border-slate-200 p-8 rounded-3xl card-hover group cursor-pointer shadow-sm">
+                  <div className="w-14 h-14 rounded-2xl bg-green-100 flex items-center justify-center mb-6 group-hover:bg-green-600 transition-all duration-300">
+                    <Sprout className="text-green-600 group-hover:text-white transition-colors" size={28} />
+                  </div>
+                  <h4 className="text-xl font-bold mb-3 text-slate-900">Agri-Tech & Farmers</h4>
+                  <p className="text-sm text-slate-600 mb-6 font-medium">Dedicated e-services connecting farmers with government benefits.</p>
+                  <ul className="text-sm text-slate-700 space-y-3 font-medium">
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div> PM Kisan Samman Nidhi</li>
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div> Kisan Credit Card (KCC)</li>
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div> Crop Insurance (Fasal Bima)</li>
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div> Apna Khata (Jamabandi)</li>
+                  </ul>
+                </div>
+
+                {/* Service 6: Legal */}
+                <div className="bg-slate-50 border border-slate-200 p-8 rounded-3xl card-hover group cursor-pointer shadow-sm">
+                  <div className="w-14 h-14 rounded-2xl bg-rose-100 flex items-center justify-center mb-6 group-hover:bg-rose-500 transition-all duration-300">
+                    <Scale className="text-rose-600 group-hover:text-white transition-colors" size={28} />
+                  </div>
+                  <h4 className="text-xl font-bold mb-3 text-slate-900">Legal Services</h4>
+                  <p className="text-sm text-slate-600 mb-6 font-medium">Expert legal consulting and document drafting for all your needs.</p>
+                  <ul className="text-sm text-slate-700 space-y-3 font-medium">
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-rose-500 rounded-full"></div> Legal Notices</li>
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-rose-500 rounded-full"></div> Contract Drafting</li>
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-rose-500 rounded-full"></div> Trademark Registration</li>
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-rose-500 rounded-full"></div> Copyright Filing</li>
+                  </ul>
+                </div>
+
+                {/* Service 7: Registrations */}
+                <div className="bg-slate-50 border border-slate-200 p-8 rounded-3xl card-hover group cursor-pointer shadow-sm">
+                  <div className="w-14 h-14 rounded-2xl bg-teal-100 flex items-center justify-center mb-6 group-hover:bg-teal-500 transition-all duration-300">
+                    <ClipboardList className="text-teal-600 group-hover:text-white transition-colors" size={28} />
+                  </div>
+                  <h4 className="text-xl font-bold mb-3 text-slate-900">Registrations</h4>
+                  <p className="text-sm text-slate-600 mb-6 font-medium">Hassle-free registration services for startups and general businesses.</p>
+                  <ul className="text-sm text-slate-700 space-y-3 font-medium">
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-teal-500 rounded-full"></div> Shop Act License</li>
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-teal-500 rounded-full"></div> FSSAI (Food) License</li>
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-teal-500 rounded-full"></div> ISO Certification</li>
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-teal-500 rounded-full"></div> NGO/Trust Registration</li>
+                  </ul>
+                </div>
+
+                {/* Service 8: E-Commerce */}
+                <div className="bg-slate-50 border border-slate-200 p-8 rounded-3xl card-hover group cursor-pointer shadow-sm">
+                  <div className="w-14 h-14 rounded-2xl bg-orange-100 flex items-center justify-center mb-6 group-hover:bg-orange-500 transition-all duration-300">
+                    <ShoppingCart className="text-orange-600 group-hover:text-white transition-colors" size={28} />
+                  </div>
+                  <h4 className="text-xl font-bold mb-3 text-slate-900">E-Commerce Listing</h4>
+                  <p className="text-sm text-slate-600 mb-6 font-medium">Start selling online with complete account setup and cataloging.</p>
+                  <ul className="text-sm text-slate-700 space-y-3 font-medium">
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-orange-500 rounded-full"></div> Amazon Seller A/c</li>
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-orange-500 rounded-full"></div> Flipkart Onboarding</li>
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-orange-500 rounded-full"></div> Product Cataloging</li>
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-orange-500 rounded-full"></div> Account Management</li>
+                  </ul>
+                </div>
+
+                {/* Service 9: Insurance */}
+                <div className="bg-slate-50 border border-slate-200 p-8 rounded-3xl card-hover group cursor-pointer shadow-sm">
+                  <div className="w-14 h-14 rounded-2xl bg-pink-100 flex items-center justify-center mb-6 group-hover:bg-pink-500 transition-all duration-300">
+                    <Umbrella className="text-pink-600 group-hover:text-white transition-colors" size={28} />
+                  </div>
+                  <h4 className="text-xl font-bold mb-3 text-slate-900">Insurance Services</h4>
+                  <p className="text-sm text-slate-600 mb-6 font-medium">Protect your family and assets with our comprehensive insurance plans.</p>
+                  <ul className="text-sm text-slate-700 space-y-3 font-medium">
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-pink-500 rounded-full"></div> Health Insurance</li>
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-pink-500 rounded-full"></div> Life Insurance (LIC)</li>
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-pink-500 rounded-full"></div> Vehicle Insurance</li>
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-pink-500 rounded-full"></div> General Insurance</li>
+                  </ul>
+                </div>
+
+                {/* Service 10: Finance */}
+                <div className="bg-slate-50 border border-slate-200 p-8 rounded-3xl card-hover group cursor-pointer shadow-sm">
+                  <div className="w-14 h-14 rounded-2xl bg-blue-100 flex items-center justify-center mb-6 group-hover:bg-blue-500 transition-all duration-300">
+                    <Landmark className="text-blue-600 group-hover:text-white transition-colors" size={28} />
+                  </div>
+                  <h4 className="text-xl font-bold mb-3 text-slate-900">Finance & Wealth</h4>
+                  <p className="text-sm text-slate-600 mb-6 font-medium">Grow your wealth with our trusted financial and investment services.</p>
+                  <ul className="text-sm text-slate-700 space-y-3 font-medium">
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div> Mutual Funds & SIP</li>
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div> Fixed Deposits (FD)</li>
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div> Demat Accounts</li>
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div> Wealth Management</li>
+                  </ul>
+                </div>
+
+                {/* Service 11: Loans */}
+                <div className="bg-slate-50 border border-slate-200 p-8 rounded-3xl card-hover group cursor-pointer shadow-sm">
+                  <div className="w-14 h-14 rounded-2xl bg-violet-100 flex items-center justify-center mb-6 group-hover:bg-violet-500 transition-all duration-300">
+                    <Banknote className="text-violet-600 group-hover:text-white transition-colors" size={28} />
+                  </div>
+                  <h4 className="text-xl font-bold mb-3 text-slate-900">Loan Services</h4>
+                  <p className="text-sm text-slate-600 mb-6 font-medium">Quick and easy loan approvals for your personal and business needs.</p>
+                  <ul className="text-sm text-slate-700 space-y-3 font-medium">
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-violet-500 rounded-full"></div> Personal Loans</li>
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-violet-500 rounded-full"></div> Business Loans</li>
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-violet-500 rounded-full"></div> Home & Auto Loans</li>
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-violet-500 rounded-full"></div> MSME Mudra Loans</li>
+                  </ul>
+                </div>
+
+                {/* Service 12: Taxation & Auditing */}
+                <div className="bg-slate-50 border border-slate-200 p-8 rounded-3xl card-hover group cursor-pointer shadow-sm">
+                  <div className="w-14 h-14 rounded-2xl bg-zinc-100 flex items-center justify-center mb-6 group-hover:bg-zinc-600 transition-all duration-300">
+                    <Calculator className="text-zinc-600 group-hover:text-white transition-colors" size={28} />
+                  </div>
+                  <h4 className="text-xl font-bold mb-3 text-slate-900">Taxation & Auditing</h4>
+                  <p className="text-sm text-slate-600 mb-6 font-medium">Simplify your taxes and company audits with our expert CAs.</p>
+                  <ul className="text-sm text-slate-700 space-y-3 font-medium">
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-zinc-500 rounded-full"></div> GST Returns Filing</li>
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-zinc-500 rounded-full"></div> ITR & TDS Filing</li>
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-zinc-500 rounded-full"></div> Balance Sheets</li>
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-zinc-500 rounded-full"></div> Company Audit Reports</li>
+                  </ul>
+                </div>
+
+                {/* Service 13: Education */}
+                <div className="bg-slate-50 border border-slate-200 p-8 rounded-3xl card-hover group cursor-pointer shadow-sm">
+                  <div className="w-14 h-14 rounded-2xl bg-sky-100 flex items-center justify-center mb-6 group-hover:bg-sky-500 transition-all duration-300">
+                    <GraduationCap className="text-sky-600 group-hover:text-white transition-colors" size={28} />
+                  </div>
+                  <h4 className="text-xl font-bold mb-3 text-slate-900">Education & Admissions</h4>
+                  <p className="text-sm text-slate-600 mb-6 font-medium">Online assistance for school, college, and university procedures.</p>
+                  <ul className="text-sm text-slate-700 space-y-3 font-medium">
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-sky-500 rounded-full"></div> College Admissions</li>
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-sky-500 rounded-full"></div> Scholarship Portals</li>
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-sky-500 rounded-full"></div> Exam Forms Filling</li>
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-sky-500 rounded-full"></div> Distance Learning Setup</li>
+                  </ul>
+                </div>
+
+                {/* Service 15: Visa & Immigration */}
+                <div className="bg-slate-50 border border-slate-200 p-8 rounded-3xl card-hover group cursor-pointer shadow-sm">
+                  <div className="w-14 h-14 rounded-2xl bg-slate-200 flex items-center justify-center mb-6 group-hover:bg-slate-700 transition-all duration-300">
+                    <Globe className="text-slate-700 group-hover:text-white transition-colors" size={28} />
+                  </div>
+                  <h4 className="text-xl font-bold mb-3 text-slate-900">Visa & Immigration</h4>
+                  <p className="text-sm text-slate-600 mb-6 font-medium">End-to-end guidance for foreign travel, study, and work permits.</p>
+                  <ul className="text-sm text-slate-700 space-y-3 font-medium">
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-slate-500 rounded-full"></div> Tourist & Work Visas</li>
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-slate-500 rounded-full"></div> Student Visa Applications</li>
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-slate-500 rounded-full"></div> Embassy Appointments</li>
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-slate-500 rounded-full"></div> Passport Renewal</li>
+                  </ul>
+                </div>
+
+                {/* Service 16: B2B Tendering & GeM */}
+                <div className="bg-slate-50 border border-slate-200 p-8 rounded-3xl card-hover group cursor-pointer shadow-sm">
+                  <div className="w-14 h-14 rounded-2xl bg-stone-100 flex items-center justify-center mb-6 group-hover:bg-stone-500 transition-all duration-300">
+                    <Building className="text-stone-600 group-hover:text-white transition-colors" size={28} />
+                  </div>
+                  <h4 className="text-xl font-bold mb-3 text-slate-900">B2B Tendering & GeM</h4>
+                  <p className="text-sm text-slate-600 mb-6 font-medium">Unlock government contracts with proper marketplace registrations.</p>
+                  <ul className="text-sm text-slate-700 space-y-3 font-medium">
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-stone-500 rounded-full"></div> GeM Seller Registration</li>
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-stone-500 rounded-full"></div> e-Tender Filling</li>
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-stone-500 rounded-full"></div> Vendor Onboarding</li>
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-stone-500 rounded-full"></div> Digital Certifications</li>
+                  </ul>
+                </div>
+
+                {/* Service 17: Digital Marketing */}
+                <div className="bg-slate-50 border border-slate-200 p-8 rounded-3xl card-hover group cursor-pointer shadow-sm">
+                  <div className="w-14 h-14 rounded-2xl bg-fuchsia-100 flex items-center justify-center mb-6 group-hover:bg-fuchsia-600 transition-all duration-300">
+                    <Megaphone className="text-fuchsia-600 group-hover:text-white transition-colors" size={28} />
+                  </div>
+                  <h4 className="text-xl font-bold mb-3 text-slate-900">Digital Marketing & IT</h4>
+                  <p className="text-sm text-slate-600 mb-6 font-medium">Elevate your brand with digital presence and marketing strategies.</p>
+                  <ul className="text-sm text-slate-700 space-y-3 font-medium">
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-fuchsia-500 rounded-full"></div> Website Development</li>
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-fuchsia-500 rounded-full"></div> Logo & Graphic Design</li>
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-fuchsia-500 rounded-full"></div> Social Media Ads</li>
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-fuchsia-500 rounded-full"></div> Google Business Profile</li>
+                  </ul>
+                </div>
+
+                {/* Service 18: Real Estate */}
+                <div className="bg-slate-50 border border-slate-200 p-8 rounded-3xl card-hover group cursor-pointer shadow-sm">
+                  <div className="w-14 h-14 rounded-2xl bg-yellow-100 flex items-center justify-center mb-6 group-hover:bg-yellow-500 transition-all duration-300">
+                    <HomeIcon className="text-yellow-600 group-hover:text-white transition-colors" size={28} />
+                  </div>
+                  <h4 className="text-xl font-bold mb-3 text-slate-900">Real Estate & Property</h4>
+                  <p className="text-sm text-slate-600 mb-6 font-medium">Secure your land and housing deals with proper legal documentation.</p>
+                  <ul className="text-sm text-slate-700 space-y-3 font-medium">
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-yellow-500 rounded-full"></div> Property Registry</li>
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-yellow-500 rounded-full"></div> Lease Deeds Preparation</li>
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-yellow-500 rounded-full"></div> RERA Registration</li>
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-yellow-500 rounded-full"></div> Title Search Report</li>
+                  </ul>
+                </div>
+
+                {/* Service 19: Employment */}
+                <div className="bg-slate-50 border border-slate-200 p-8 rounded-3xl card-hover group cursor-pointer shadow-sm">
+                  <div className="w-14 h-14 rounded-2xl bg-lime-100 flex items-center justify-center mb-6 group-hover:bg-lime-600 transition-all duration-300">
+                    <Users className="text-lime-600 group-hover:text-white transition-colors" size={28} />
+                  </div>
+                  <h4 className="text-xl font-bold mb-3 text-slate-900">Employment & HR</h4>
+                  <p className="text-sm text-slate-600 mb-6 font-medium">Empowering youth and businesses with employment portal services.</p>
+                  <ul className="text-sm text-slate-700 space-y-3 font-medium">
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-lime-500 rounded-full"></div> Govt Job Applications</li>
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-lime-500 rounded-full"></div> Resume / CV Building</li>
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-lime-500 rounded-full"></div> PF Withdrawal Claims</li>
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-lime-500 rounded-full"></div> ESI Registration</li>
+                  </ul>
+                </div>
+
+                {/* Service 20: Healthcare */}
+                <div className="bg-slate-50 border border-slate-200 p-8 rounded-3xl card-hover group cursor-pointer shadow-sm">
+                  <div className="w-14 h-14 rounded-2xl bg-red-100 flex items-center justify-center mb-6 group-hover:bg-red-500 transition-all duration-300">
+                    <HeartPulse className="text-red-600 group-hover:text-white transition-colors" size={28} />
+                  </div>
+                  <h4 className="text-xl font-bold mb-3 text-slate-900">Healthcare & Wellness</h4>
+                  <p className="text-sm text-slate-600 mb-6 font-medium">Easy access to state and national health schemes and bookings.</p>
+                  <ul className="text-sm text-slate-700 space-y-3 font-medium">
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-red-500 rounded-full"></div> Ayushman Bharat Card</li>
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-red-500 rounded-full"></div> Chiranjeevi Yojana</li>
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-red-500 rounded-full"></div> Telemedicine Setup</li>
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-red-500 rounded-full"></div> Health Checkup Booking</li>
+                  </ul>
+                </div>
+
+                {/* Service 21: DSC & Cyber */}
+                <div className="bg-slate-50 border border-slate-200 p-8 rounded-3xl card-hover group cursor-pointer shadow-sm">
+                  <div className="w-14 h-14 rounded-2xl bg-neutral-200 flex items-center justify-center mb-6 group-hover:bg-neutral-600 transition-all duration-300">
+                    <Key className="text-neutral-700 group-hover:text-white transition-colors" size={28} />
+                  </div>
+                  <h4 className="text-xl font-bold mb-3 text-slate-900">Digital Signature & Cyber</h4>
+                  <p className="text-sm text-slate-600 mb-6 font-medium">Secure your digital identity and get help with cyber security issues.</p>
+                  <ul className="text-sm text-slate-700 space-y-3 font-medium">
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-neutral-500 rounded-full"></div> DSC Generation (Class 3)</li>
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-neutral-500 rounded-full"></div> Cyber Fraud Reporting</li>
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-neutral-500 rounded-full"></div> IT Security Consulting</li>
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-neutral-500 rounded-full"></div> Secure Email Setup</li>
+                  </ul>
+                </div>
+
+                {/* Service 22: Transport & RTO */}
+                <div className="bg-slate-50 border border-slate-200 p-8 rounded-3xl card-hover group cursor-pointer shadow-sm">
+                  <div className="w-14 h-14 rounded-2xl bg-blue-100 flex items-center justify-center mb-6 group-hover:bg-blue-600 transition-all duration-300">
+                    <Car className="text-blue-600 group-hover:text-white transition-colors" size={28} />
+                  </div>
+                  <h4 className="text-xl font-bold mb-3 text-slate-900">Transport & RTO Services</h4>
+                  <p className="text-sm text-slate-600 mb-6 font-medium">Complete vehicle and driving-related portal assistance.</p>
+                  <ul className="text-sm text-slate-700 space-y-3 font-medium">
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div> Driving License (DL)</li>
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div> Vehicle RC (Vahan)</li>
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div> FASTag Recharge</li>
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div> Commercial Permits</li>
+                  </ul>
+                </div>
+
+                {/* Service 23: Senior Citizen */}
+                <div className="bg-slate-50 border border-slate-200 p-8 rounded-3xl card-hover group cursor-pointer shadow-sm">
+                  <div className="w-14 h-14 rounded-2xl bg-teal-100 flex items-center justify-center mb-6 group-hover:bg-teal-600 transition-all duration-300">
+                    <HeartHandshake className="text-teal-600 group-hover:text-white transition-colors" size={28} />
+                  </div>
+                  <h4 className="text-xl font-bold mb-3 text-slate-900">Senior Citizen & Pension</h4>
+                  <p className="text-sm text-slate-600 mb-6 font-medium">Priority services for elderly care and retirement benefits.</p>
+                  <ul className="text-sm text-slate-700 space-y-3 font-medium">
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-teal-500 rounded-full"></div> Jeevan Pramaan</li>
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-teal-500 rounded-full"></div> Old Age Pension</li>
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-teal-500 rounded-full"></div> EPF Claim</li>
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-teal-500 rounded-full"></div> Senior Citizen Card</li>
+                  </ul>
+                </div>
+
+                {/* Service 24: Women Welfare */}
+                <div className="bg-slate-50 border border-slate-200 p-8 rounded-3xl card-hover group cursor-pointer shadow-sm">
+                  <div className="w-14 h-14 rounded-2xl bg-pink-100 flex items-center justify-center mb-6 group-hover:bg-pink-600 transition-all duration-300">
+                    <ShieldHeart className="text-pink-600 group-hover:text-white transition-colors" size={28} />
+                  </div>
+                  <h4 className="text-xl font-bold mb-3 text-slate-900">Women Welfare Schemes</h4>
+                  <p className="text-sm text-slate-600 mb-6 font-medium">Empowerment programs and financial aid exclusively for women.</p>
+                  <ul className="text-sm text-slate-700 space-y-3 font-medium">
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-pink-500 rounded-full"></div> Sukanya Samriddhi</li>
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-pink-500 rounded-full"></div> Ujjwala Gas Yojana</li>
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-pink-500 rounded-full"></div> Maternity Benefits</li>
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-pink-500 rounded-full"></div> Mahila Samman Cert.</li>
+                  </ul>
+                </div>
+
+                {/* Service 25: Startup India */}
+                <div className="bg-slate-50 border border-slate-200 p-8 rounded-3xl card-hover group cursor-pointer shadow-sm">
+                  <div className="w-14 h-14 rounded-2xl bg-orange-100 flex items-center justify-center mb-6 group-hover:bg-orange-600 transition-all duration-300">
+                    <Rocket className="text-orange-600 group-hover:text-white transition-colors" size={28} />
+                  </div>
+                  <h4 className="text-xl font-bold mb-3 text-slate-900">Startup India Support</h4>
+                  <p className="text-sm text-slate-600 mb-6 font-medium">Launch your dream business with complete recognition and funding.</p>
+                  <ul className="text-sm text-slate-700 space-y-3 font-medium">
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-orange-500 rounded-full"></div> DPIIT Registration</li>
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-orange-500 rounded-full"></div> Pitch Deck Creation</li>
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-orange-500 rounded-full"></div> Seed Fund App.</li>
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-orange-500 rounded-full"></div> MSME Subsidies</li>
+                  </ul>
+                </div>
+
+                {/* Service 26: Import-Export */}
+                <div className="bg-slate-50 border border-slate-200 p-8 rounded-3xl card-hover group cursor-pointer shadow-sm">
+                  <div className="w-14 h-14 rounded-2xl bg-cyan-100 flex items-center justify-center mb-6 group-hover:bg-cyan-600 transition-all duration-300">
+                    <Ship className="text-cyan-600 group-hover:text-white transition-colors" size={28} />
+                  </div>
+                  <h4 className="text-xl font-bold mb-3 text-slate-900">Import-Export Trade</h4>
+                  <p className="text-sm text-slate-600 mb-6 font-medium">Global trade licensing and customs documentation made easy.</p>
+                  <ul className="text-sm text-slate-700 space-y-3 font-medium">
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-cyan-500 rounded-full"></div> IEC Code</li>
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-cyan-500 rounded-full"></div> RCMC Registration</li>
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-cyan-500 rounded-full"></div> AD Code Reg.</li>
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-cyan-500 rounded-full"></div> Customs Docs</li>
+                  </ul>
+                </div>
+
+                {/* Service 27: NGO & CSR */}
+                <div className="bg-slate-50 border border-slate-200 p-8 rounded-3xl card-hover group cursor-pointer shadow-sm">
+                  <div className="w-14 h-14 rounded-2xl bg-rose-100 flex items-center justify-center mb-6 group-hover:bg-rose-600 transition-all duration-300">
+                    <Handshake className="text-rose-600 group-hover:text-white transition-colors" size={28} />
+                  </div>
+                  <h4 className="text-xl font-bold mb-3 text-slate-900">NGO & CSR Solutions</h4>
+                  <p className="text-sm text-slate-600 mb-6 font-medium">Compliance and funding support for trusts and non-profits.</p>
+                  <ul className="text-sm text-slate-700 space-y-3 font-medium">
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-rose-500 rounded-full"></div> NITI Aayog Darpan</li>
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-rose-500 rounded-full"></div> 12A & 80G Exemption</li>
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-rose-500 rounded-full"></div> FCRA Registration</li>
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-rose-500 rounded-full"></div> CSR Funding</li>
+                  </ul>
+                </div>
+
+                {/* Service 28: Merchant Setup */}
+                <div className="bg-slate-50 border border-slate-200 p-8 rounded-3xl card-hover group cursor-pointer shadow-sm">
+                  <div className="w-14 h-14 rounded-2xl bg-indigo-100 flex items-center justify-center mb-6 group-hover:bg-indigo-600 transition-all duration-300">
+                    <Store className="text-indigo-600 group-hover:text-white transition-colors" size={28} />
+                  </div>
+                  <h4 className="text-xl font-bold mb-3 text-slate-900">Merchant & Payment Setup</h4>
+                  <p className="text-sm text-slate-600 mb-6 font-medium">Digital payment solutions for local shops and online merchants.</p>
+                  <ul className="text-sm text-slate-700 space-y-3 font-medium">
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-indigo-500 rounded-full"></div> POS Machine Setup</li>
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-indigo-500 rounded-full"></div> Payment Gateway</li>
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-indigo-500 rounded-full"></div> Merchant QR Codes</li>
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-indigo-500 rounded-full"></div> Current Accounts</li>
+                  </ul>
+                </div>
+
+                {/* Service 29: RTI & Consumer */}
+                <div className="bg-slate-50 border border-slate-200 p-8 rounded-3xl card-hover group cursor-pointer shadow-sm">
+                  <div className="w-14 h-14 rounded-2xl bg-slate-200 flex items-center justify-center mb-6 group-hover:bg-slate-700 transition-all duration-300">
+                    <Scale className="text-slate-700 group-hover:text-white transition-colors" size={28} />
+                  </div>
+                  <h4 className="text-xl font-bold mb-3 text-slate-900">RTI & Consumer Rights</h4>
+                  <p className="text-sm text-slate-600 mb-6 font-medium">Legal guidance to help citizens exercise their rights effectively.</p>
+                  <ul className="text-sm text-slate-700 space-y-3 font-medium">
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-slate-500 rounded-full"></div> RTI Filing</li>
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-slate-500 rounded-full"></div> Consumer Court</li>
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-slate-500 rounded-full"></div> CM Helpline</li>
+                    <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-slate-500 rounded-full"></div> Legal Counseling</li>
+                  </ul>
+                </div>
+
               </div>
             </div>
           </section>
 
-          <footer className="relative z-10 pt-16 pb-8 border-t border-slate-200 overflow-hidden">
+          {/* --- FOOTER SECTION CENTERED --- */}
+          <footer id="contact" className="relative z-10 pt-16 pb-8 border-t border-slate-200 overflow-hidden">
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-500"></div>
             
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+              <div className="flex flex-col items-center text-center gap-12 mb-12 max-w-3xl mx-auto">
                 
-                <div className="col-span-1 md:col-span-1">
-                  <div className="flex items-center gap-2 mb-4 group cursor-pointer">
-                    <div className="relative w-8 h-8 flex items-center justify-center bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg shadow-sm transition-transform duration-300 group-hover:scale-105">
-                      <div className="absolute w-3.5 h-[18px] border-2 border-white rounded-[3px]"></div>
-                      <div className="absolute w-5 h-[2px] bg-white transform -rotate-45 rounded-full"></div>
-                    </div>
-                    <span className="text-lg font-light tracking-wider text-indigo-600 ml-1 font-inter">ZERO ENTERPRISE</span>
+                <div className="flex flex-col items-center">
+                  <div className="flex items-center justify-center gap-2 mb-4 group cursor-pointer">
+                    <span className="text-lg font-bold tracking-wider text-indigo-600 ml-1 font-inter">ZERO ENTERPRISE</span>
                   </div>
-                  <p className="text-slate-600 text-sm mb-6 leading-relaxed font-medium">
+                  <p className="text-slate-600 text-sm mb-6 leading-relaxed font-medium max-w-md">
                     Empowering Rajasthan digitally since 2018. The ultimate zero-to-hero gateway for all your G2C, B2B, and FinTech needs.
                   </p>
-                  <div className="flex gap-4">
+                  <div className="flex justify-center gap-4">
                     <div className="w-10 h-10 rounded-full bg-slate-50 hover:bg-indigo-50 border border-slate-200 cursor-pointer transition-colors flex items-center justify-center text-slate-600 hover:text-indigo-600 font-bold shadow-sm">
                       f
                     </div>
@@ -518,9 +1176,9 @@
                   </div>
                 </div>
 
-                <div>
-                  <h4 className="text-slate-900 font-bold mb-5 text-lg">Ecosystem</h4>
-                  <ul className="space-y-3 text-sm text-slate-600 font-medium">
+                <div className="flex flex-col items-center">
+                  <h4 className="text-slate-900 font-bold mb-5 text-lg">Services</h4>
+                  <ul className="space-y-3 text-sm text-slate-600 font-medium text-center">
                     <li><a href="#services" className="hover:text-indigo-600 transition-colors block">Gov-Tech Services</a></li>
                     <li><a href="#services" className="hover:text-indigo-600 transition-colors block">Financial Suite</a></li>
                     <li><a href="#services" className="hover:text-indigo-600 transition-colors block">Legal & Compliance</a></li>
@@ -528,9 +1186,9 @@
                   </ul>
                 </div>
 
-                <div>
+                <div className="flex flex-col items-center">
                   <h4 className="text-slate-900 font-bold mb-5 text-lg">Company</h4>
-                  <ul className="space-y-3 text-sm text-slate-600 font-medium">
+                  <ul className="space-y-3 text-sm text-slate-600 font-medium text-center">
                     <li><a href="#about" className="hover:text-indigo-600 transition-colors block">About Us</a></li>
                     <li><a href="#home" className="hover:text-indigo-600 transition-colors block">Careers</a></li>
                     <li><a href="#home" className="hover:text-indigo-600 transition-colors block">Privacy Policy</a></li>
@@ -538,12 +1196,12 @@
                   </ul>
                 </div>
 
-                <div>
+                <div className="flex flex-col items-center">
                   <h4 className="text-slate-900 font-bold mb-5 text-lg">Contact Us</h4>
-                  <ul className="space-y-3 text-sm text-slate-600 font-semibold bg-slate-50 p-4 rounded-xl border border-slate-200">
-                    <li className="flex items-center gap-2"><div className="w-2 h-2 bg-indigo-500 rounded-full"></div> Address: Rajasthan, India</li>
-                    <li className="flex items-center gap-2"><div className="w-2 h-2 bg-emerald-500 rounded-full"></div> Phone: +91 73403 37074</li>
-                    <li className="flex items-center gap-2"><div className="w-2 h-2 bg-purple-500 rounded-full"></div> Email: info@zeroenterprise.com</li>
+                  <ul className="space-y-3 text-sm text-slate-600 font-medium text-center">
+                    <li>Address: Barmer, Rajasthan, India</li>
+                    <li>Phone: +91 73403 37074</li>
+                    <li>Email: info@zeroenterprise.in</li>
                   </ul>
                 </div>
 
